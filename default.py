@@ -82,7 +82,7 @@ def extract_videos(content):
 			yid = re.search('<a href="/watch\?v=(?P<id>[^"]+)"', entry).group('id')
 			time = re.search('<span class="video-time".*>(?P<minutes>[0-9]+):(?P<seconds>[0-9]+)</span>', entry)
 			duration = int(time.group('minutes')) * 60 + int(time.group('seconds'))
-			title = HTMLParser.HTMLParser().unescape(re.search('<h3 class="yt-lockup-title">.*>(?P<title>[^<]+)</a>', entry).group('title'))
+			title = HTMLParser.HTMLParser().unescape(re.search('<h3 class="yt-lockup-title.*">.*>(?P<title>[^<]+)</a>', entry).group('title'))
 			yield yid, duration, title
 		except AttributeError:
 			continue
