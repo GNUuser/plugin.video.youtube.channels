@@ -193,7 +193,7 @@ def search(category):
 	keyboard.doModal()
 	if keyboard.isConfirmed() and keyboard.getText():
 		search_string = keyboard.getText()
-		xbmc.executebuiltin('ActivateWindow(videolibrary, ' + build_url(target='listSearchChannels', query=search_string, category=category) + ')')
+		xbmc.executebuiltin('ActivateWindow(videos, ' + build_url(target='listSearchChannels', query=search_string, category=category) + ')')
 
 
 def listSearchChannels(query, category, page='1'):
