@@ -17,6 +17,8 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
+import YDStreamExtractor
+
 
 class Channel(object):
 	def __init__(self, name, user, thumb, category, mode=0):
@@ -95,7 +97,7 @@ def fix_thumbnail(thumb):
 
 
 def getYoutubeUrl(youtubeID):
-	return ('plugin://video/YouTube/?path=/root/video&action=play_video&videoid=' if xbox else 'plugin://plugin.video.youtube/play/?video_id=') + youtubeID
+	return YDStreamExtractor.getVideoInfo('http://www.youtube.com/watch?v=' + youtubeID, quality=2).streamURL()
 
 
 def getUrl(url, **query):

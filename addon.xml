@@ -2,6 +2,7 @@
 <addon id="plugin.video.youtube.channels" name="YouTube Channels" version="2.0.2" provider-name="AddonScriptorDE">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.youtube.dl" version="19.912.0"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>
