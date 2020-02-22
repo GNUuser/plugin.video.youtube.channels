@@ -202,15 +202,21 @@ def listSearchChannels(query, category, page='1'):
 	for entry in entries:
 		try:
 			name = HTMLParser.HTMLParser().unescape(re.search('title="(?P<name>[^"]+)"', entry).group('name'))
-			user = re.search('href="/user/(?P<user>[^"]+)"', entry).group('user')
+			try:
+				user = re.search('href="/user/(?P<user>[^"]+)"', entry).group('user')
+			except AttributeError:
+				user = re.search('href="(?P<channel>/channel/[^"]+)"', entry).group('channel')
 			try:
 				thumb = re.search('data-thumb="(?P<thumb>[^"]+)"', entry).group('thumb')
 			except AttributeError:
-				thumb = re.search('<img src="(?P<thumb>[^"]+)"', entry).group('thumb')
+				thumb = re.search('<img [^>]*src="(?P<thumb>[^"]+)"', entry).group('thumb')
 			thumb = fix_thumbnail(thumb)
-			subscribers = re.search('>(?P<subscribers>[0-9.]+)</span>', entry).group('subscribers')
+			try:
+				info = '{} subscribers'.format(re.search('>(?P<subscribers>[0-9.]+)</span>', entry).group('subscribers'))
+			except AttributeError:
+				info = '{} videos'.format(re.search('<li>(?P<videos>[0-9]+)', entry).group('videos'))
 			addItem(
-				'[B]{}[/B] - {} subscribers'.format(name, subscribers),
+				'[B]{}[/B] - {}'.format(name, info),
 				thumbnailImage=thumb,
 				contextMenu=[
 					build_context_entry(30026, target='playChannel', user=user),
@@ -220,10 +226,12 @@ def listSearchChannels(query, category, page='1'):
 				user=user,
 			)
 		except AttributeError:
-			continue
+			pass
 	match = re.search('data-link-type="next" data-page="(?P<page>[0-9]+)"', content)
 	if match:
 		addItem(translation(30007), target='listSearchChannels', query=query, category=category, page=match.group('page'))
+	else:
+		addItem(translation(30007), target='listSearchChannels', query=query, category=category, page=str(int(page) + 1))
 	xbmcplugin.endOfDirectory(pluginhandle)
 
 
@@ -231,6 +239,8 @@ def listVideos(user, mode=0, continuation=None):
 	if continuation is not None:
 		jsondata = json.loads(getUrl('https://www.youtube.com' + continuation))
 		content = jsondata.get('content_html') + jsondata.get('load_more_widget_html')
+	elif user.startswith('/'):
+		content = getUrl('https://www.youtube.com{}/videos'.format(user), view=mode)
 	else:
 		content = getUrl('https://www.youtube.com/user/{}/videos'.format(user), view=mode)
 	try:
@@ -256,7 +266,10 @@ def playVideo(url):
 
 
 def playChannel(user, mode=0):
-	content = getUrl('https://www.youtube.com/user/{}/videos'.format(user), view=mode)
+	if user.startswith('/'):
+		content = getUrl('https://www.youtube.com/{}/videos'.format(user), view=mode)
+	else:
+		content = getUrl('https://www.youtube.com/user/{}/videos'.format(user), view=mode)
 	playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
 	playlist.clear()
 	for yid, duration, title in extract_videos(content):
@@ -292,7 +305,10 @@ def removeChannel(user):
 
 
 def updateThumb(user):
-	content = getUrl('https://www.youtube.com/user/{}'.format(user))
+	if user.startswith('/'):
+		content = getUrl('https://www.youtube.com{}'.format(user))
+	else:
+		content = getUrl('https://www.youtube.com/user/{}'.format(user))
 	thumbnail = re.search('<link itemprop="thumbnailUrl" href="(?P<thumbnail>[^"]+)">', content)
 	if thumbnail:
 		newthumb = fix_thumbnail(thumbnail.group('thumbnail'))
