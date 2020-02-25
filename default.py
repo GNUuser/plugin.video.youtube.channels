@@ -158,7 +158,7 @@ def myChannels():
 			)
 		empty = False
 	if empty:
-		search()
+		search(None)
 	else:
 		xbmcplugin.endOfDirectory(pluginhandle)
 		xbmcplugin.addSortMethod(pluginhandle, xbmcplugin.SORT_METHOD_LABEL)
@@ -195,7 +195,10 @@ def search(category):
 	keyboard.doModal()
 	if keyboard.isConfirmed() and keyboard.getText():
 		search_string = keyboard.getText()
-		xbmc.executebuiltin('ActivateWindow(videos, ' + build_url(target='listSearchChannels', query=search_string, category=category) + ')')
+		if category is None:
+			listSearchChannels(search_string, 'NoCat')
+		else:
+			xbmc.executebuiltin('ActivateWindow(videos, ' + build_url(target='listSearchChannels', query=search_string, category=category) + ')')
 
 
 def listSearchChannels(query, category, page='1'):
